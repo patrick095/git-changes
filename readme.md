@@ -1,4 +1,4 @@
-# Bot para pegar todas suas alterações do mês para poder enviar mais fácil para plataforma
+# Bot para pegar todas suas alterações do mês do seu GIT
 
 ## Configuração
 - Renomei o arquivo .env.local para .env 
