@@ -23,7 +23,7 @@
                 <form>
                     <div class="mb-3">
                         <label for="gitUrl" class="form-label">Url da API do seu GIT</label>
-                        <input type="text" class="form-control" id="gitUrl" placeholder="https://gitlab.com.br">
+                        <input type="text" class="form-control" id="gitUrl" placeholder="https://gitlab.com.br/api/v4">
                     </div>
                     <div class="mb-3">
                         <label for="accessToken" class="form-label">Access Token</label>
@@ -99,7 +99,7 @@
                 return alert("Você precisa preencher os campos corretamente para poder salvar os dados!")
             }
 
-            $(this).prop("disabled", true);
+            $("#btn-salvar-dados-git").prop("disabled", true);
 
             axios.post('/git-info', {
                 accessToken,
@@ -112,13 +112,13 @@
                 alert(error?.response?.data?.message ?? "Erro ao realizar requisição.");
             })
             .then(() => {
-                $(this).prop("disabled", false);
+                $("#btn-salvar-dados-git").prop("disabled", false);
             })
         });
 
         $("#btn-atualizar-dados-git").on("click", () => {
-            const originalText = $(this).text();
-            $(this).prop("disabled", true).text("carregando dados...");
+            const originalText = $("#btn-atualizar-dados-git").text();
+            $("#btn-atualizar-dados-git").prop("disabled", true).text("carregando dados...");
 
             axios.post('/git-update')
             .then(() => getUserDataOnGit())
@@ -127,7 +127,7 @@
                 $(".card-setting-git").show();
                 $(".card-user").hide();
             })
-            .then(() => $(this).prop("disabled", false).text(originalText));
+            .then(() => $("#btn-atualizar-dados-git").prop("disabled", false).text(originalText));
         });
 
         const getUserDataOnGit = async () => {
