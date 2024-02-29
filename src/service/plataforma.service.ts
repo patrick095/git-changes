@@ -104,6 +104,10 @@ export class PlataformaService {
                 return isNewFile 
                     ? { code: '5.10.18', description: 'Criação de teste' }
                     : { code: '5.10.21', description: 'Alteração de teste' }
+            case 'sql':
+                return isNewFile 
+                    ? { code: '5.10.18', description: 'Criação de teste' }
+                    : { code: '5.10.21', description: 'Alteração de teste' }
             case 'html':
                 return isNewFile 
                     ? { code: '5.10.1', description: 'Criação de tela HTML' }
@@ -126,12 +130,16 @@ export class PlataformaService {
                     : { code: '5.10.8', description: 'Alteração Dockerfile' }
             case 'yml':
                 return isNewFile 
-                    ? { code: '5.15.7', description: 'Criação Docker Compose' }
-                    : { code: '5.15.8', description: 'Alteração Docker Compose' }
-            case 'yml':
+                    ? { code: '5.15.9', description: 'Criação Docker Compose' }
+                    : { code: '5.15.10', description: 'Alteração Docker Compose' }
+            case 'yaml':
                 return isNewFile 
-                    ? { code: '5.15.9', description: 'Criação Dockerfile' }
-                    : { code: '5.15.10', description: 'Alteração Dockerfile' }
+                    ? { code: '5.10.7', description: 'Criação de arquivo chave/valor' }
+                    : { code: '5.10.8', description: 'Alteração de arquivo chave/valor' }
+            case 'xml':
+                return isNewFile 
+                    ? { code: '5.10.7', description: 'Criação de arquivo chave/valor' }
+                    : { code: '5.10.8', description: 'Alteração de arquivo chave/valor' }
             case 'sh':
                 return isNewFile 
                     ? { code: '5.15.1', description: 'Criação scripts (.sh ou outros)' }
