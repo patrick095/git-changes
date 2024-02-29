@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Changes</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid p-5">
+        <div class="card m-5">
+            <div class="card-body card-loading flex justify-content-center">
+                Carregando...
+            </div>
+            <div class="card-body card-setting-git flex p-5 flex-column none">
+                <h1>Git Changes</h1>
+                <legend>Você ainda não configurou seu git, utilize os campos abaixo para configurar o Git.</legend>
+
+                <form>
+                    <div class="mb-3">
+                        <label for="gitUrl" class="form-label">Url da API do seu GIT</label>
+                        <input type="text" class="form-control" id="gitUrl" placeholder="https://gitlab.com.br/api/v4">
+                    </div>
+                    <div class="mb-3">
+                        <label for="accessToken" class="form-label">Access Token</label>
+                        <input type="text" class="form-control" id="accessToken">
+                    </div>
+                    <button type="button" id="btn-salvar-dados-git" class="btn btn-primary">Salvar</button>
+                </form>
+            </div>
+            <div class="card-body card-user none">
+                <h1>Git Changes</h1>
+                <div>
+                    <ul>
+                        <li>Status: <span id="user-status">Atualizado.</span></li>
+                        <li>Status do Git: <span>Configurado</span></li>
+                        <li>Status do usuário: <span id="user-data-status">Dados ainda não carregados</span></li>
+                        <li>Commits esse mês: <span id="user-git-commits">0</span></li>
+                    </ul>
+
+                    <div class="accordion" id="accordionExample">
+                        <div class="accordion-item">
+                          <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                              Relatório por commits
+                            </button>
+                          </h2>
+                          <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                              <pre id="user-report-commits"></pre>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="accordion-item">
+                          <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                              Relatório por Projetos
+                            </button>
+                          </h2>
+                          <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                              <pre id="user-report-projects"></pre>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                    <button type="button" id="btn-atualizar-dados-git" class="btn btn-primary">Atualizar Dados do Git</button>
+                </div>
+            </div>
+        </div>
+    </div>    
+</body>
+<script>
+    $(() => {
+        axios.get('/git-info')
+        .then((res) => {
+            $(".card-loading").hide();
+            if (!res.data.accessToken || !res.data.gitUrl) {
+                return $(".card-setting-git").show();
+            }
+            $("#accessToken").val(res.data.accessToken);
+            $("#gitUrl").val(res.data.gitUrl);
+
+            $(".card-setting-git").hide();
+            $(".card-user").show();
+            getUserDataOnGit();
+        });
+
+        $("#btn-salvar-dados-git").on("click", () => {
+            const accessToken = $("#accessToken").val();
+            const gitUrl = $("#gitUrl").val();
+
+            if (!accessToken || !gitUrl) {
+                return alert("Você precisa preencher os campos corretamente para poder salvar os dados!")
+            }
+
+            $("#btn-salvar-dados-git").prop("disabled", true);
+
+            axios.post('/git-info', {
+                accessToken,
+                gitUrl
+            }).then((res) => {
+                $(".card-setting-git").hide();
+                $(".card-user").show();
+                getUserDataOnGit();
+            }).catch((error) => {
+                alert(error?.response?.data?.message ?? "Erro ao realizar requisição.");
+            })
+            .then(() => {
+                $("#btn-salvar-dados-git").prop("disabled", false);
+            })
+        });
+
+        $("#btn-atualizar-dados-git").on("click", () => {
+            const originalText = $("#btn-atualizar-dados-git").text();
+            $("#btn-atualizar-dados-git").prop("disabled", true).text("carregando dados...");
+
+            axios.post('/git-update')
+            .then(() => getUserDataOnGit())
+            .catch(() => {
+                alert("Falha ao atualizar dados do GIT, favor verificar os dados de configuração do GIT!");
+                $(".card-setting-git").show();
+                $(".card-user").hide();
+            })
+            .then(() => $("#btn-atualizar-dados-git").prop("disabled", false).text(originalText));
+        });
+
+        const getUserDataOnGit = async () => {
+            $("#user-status").text("Atualizando dados, aguarde...");
+            const dataByCommits = await axios.get('/git-data-commit')
+            .catch((err) => console.error(err));
+            const dataByProjects = await axios.get('/git-data-project')
+            .catch((err) => console.error(err));
+            const commits = await axios.get('/git-commits')
+            .catch((err) => console.error(err));
+            
+            if (dataByCommits && dataByProjects) {
+                $('#user-data-status').text("Dados Sincronizados");
+                $("#user-git-commits").text(commits.data.commits);
+                $("#user-report-commits").text(JSON.stringify(dataByCommits.data, null, 2));
+                $("#user-report-projects").text(JSON.stringify(dataByProjects.data, null, 2));
+            }
+            $("#user-status").text("Atualizado.");
+        }
+
+    });
+</script>
+<style>
+    .card {
+        min-width: 50vw;
+        min-height: 70vh;
+    }
+    .card-body {
+        align-items: center;
+    }
+    .card-body form {
+        width: 100%;
+        padding: 16px;
+    }
+    .none {
+        display: none;
+    }
+    .flex {
+        display: flex;
+    }
+</style>
+</html>

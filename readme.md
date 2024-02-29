@@ -1,8 +1,6 @@
 # Bot para pegar todas suas alterações do mês do seu GIT
 
 ## Configuração
-- Renomei o arquivo .env.local para .env 
-- Coloque a url do seu gitlab caso utilize uma instância do gitlab
 - Rode o comando `npm install` para instalar as dependências do projeto
 - rode o comando `npm run build` para realizar o build do projeto
 
@@ -18,3 +16,4 @@
 
 ## iniciando
 - Para rodar o projeto basta realizar as etapas de configuração e rodar o comando `npm start`
+- o projeto irá rodar na url: http://localhost:3000

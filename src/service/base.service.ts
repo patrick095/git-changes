@@ -1,19 +1,21 @@
 import axios, { AxiosHeaders } from 'axios';
 import https from 'https';
-import dotenv from "dotenv";
+import { GitRepository } from '../repositories/git.repository';
+import { GitRepositoryInterface } from '../interfaces/repository.interface';
 
 export class BaseService {
-    constructor() {
-        dotenv.config();
-    }
-    private gitUrl = process.env.GIT_API_URL as string;
-    private AccessToken = process.env.ACCESS_TOKEN as string;
+    constructor() {}
     private httpsAgent = new https.Agent({
         rejectUnauthorized: false, // (NOTE: this will disable client verification)
       })
 
     public get<T>(url: string) {
-        return this.sendRequest<T>(`${this.gitUrl}${url}`, 'GET');
+        return this.sendRequest<T>(`${this.gitConfig.gitUrl}${url}`, 'GET');
+    }
+
+    private get gitConfig(): GitRepositoryInterface {
+        const config = new GitRepository().getConfig();
+        return config;
     }
 
     private sendRequest<T>(url: string, method: string): Promise<T> {
@@ -38,14 +40,17 @@ export class BaseService {
                 } else {
                     return resolve(res.data);
                 }
-            }).catch((reason) => reject(reason));
+            }).catch((reason) => {
+                console.log(reason);
+                reject(reason)
+            });
         })
     }
 
     private get instance() {
         return axios.create({
             httpsAgent: this.httpsAgent,
-            headers: new AxiosHeaders({ 'PRIVATE-TOKEN': this.AccessToken,
+            headers: new AxiosHeaders({ 'PRIVATE-TOKEN': this.gitConfig.accessToken,
         }) })
     }
 }
