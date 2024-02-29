@@ -21,20 +21,29 @@ class Git {
         return new Promise(async (resolve, reject) => {
             console.info('[INFO]: iniciando Bot para pegar suas alterações do mês no Git');
             const userId = await this.getUserId()
-            .catch((err) => {
-                console.error("[ERROR] - Failed to connect to Git!");
-                return 0;
-            });
+                .catch((err) => {
+                    console.error("[ERROR] - Failed to connect to Git!");
+                    reject();
+                    return 0;
+                });
     
-            if (!userId) return reject();
-    
-            const commits = await this.getUserCommitsIds(userId);
+            const commits = await this.getUserCommitsIds(userId)
+                .catch((err) => {
+                    console.error("[ERROR] - Failed to connect to Git!");
+                    reject();
+                    return [];
+                });
             console.info(
                 `[INFO]: O usuário realizou ${
                     commits?.length ?? 0
                 } Commits esse mês.\nBuscando histórico de arquivos.`
             );
-            const files = await this.getFilesInfo(commits);
+            const files = await this.getFilesInfo(commits)
+                .catch((err) => {
+                    console.error("[ERROR] - Failed to connect to Git!");
+                    reject();
+                    return [];
+                });
             const formatedFiles =
                 this.plataformaService.splitFilesByTypeForSendToPlataform(files);
             const finalFormatedFiles =
