@@ -110,7 +110,6 @@ class Git {
 
     private getUserId(): Promise<number> {
         return this.service.get<{ id: number }>(`/user`).then((res) => {
-            console.log(res)
             return res.id ?? "";
         });
     }
