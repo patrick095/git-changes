@@ -50,7 +50,7 @@ export class BaseService {
     private get instance() {
         return axios.create({
             httpsAgent: this.httpsAgent,
-            headers: new AxiosHeaders({ 'PRIVATE-TOKEN': this.gitConfig.accessToken,
-        }) })
+            headers: new AxiosHeaders({ 'PRIVATE-TOKEN': this.gitConfig.accessToken })
+        })
     }
 }

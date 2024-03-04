@@ -1,14 +1,18 @@
 import { readFile, writeFile } from "fs";
 import { GitRepositoryInterface } from "../interfaces/repository.interface";
-import dataJson from "./git.json";
 import { join } from "path";
 import { CommitsInterface } from "../interfaces/commits.interface";
 
 export class GitRepository {
-    private _config: GitRepositoryInterface;
+    private _config!: GitRepositoryInterface;
 
     constructor() {
-        this._config = dataJson as GitRepositoryInterface;
+        readFile(join(__dirname + '/git.json'), 'utf-8', (err, data) => {
+            if (err) {
+                return console.error('[ERROR] - coldn\'t read git.json');
+            }
+            this._config = data ? JSON.parse(data) as GitRepositoryInterface : { accessToken: '', gitUrl: '' };
+        });
     }
 
     public getConfig(): GitRepositoryInterface {

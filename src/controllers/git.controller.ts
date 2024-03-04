@@ -1,4 +1,7 @@
 import { Request, Response, Router } from "express";
+import axios, { AxiosHeaders } from "axios";
+import https from 'https';
+
 import { ControllerInterface } from "../interfaces/controller.interface";
 import { GitRepository } from "../repositories/git.repository";
 import { GitInstance } from "../git";
@@ -15,6 +18,27 @@ class GitController implements ControllerInterface {
 
     public getRouter(): Router {
         return this._router;
+    }
+
+    private getUserId(req: Request, res: Response) {
+        try {
+            const { accessToken, gitUrl } = req.query;
+
+            if (!accessToken || !gitUrl) return res.status(500).json({ status: 500, message: "Dados inválidos" });
+
+            axios.get<{ id: number }>(`${gitUrl}/user`, {
+                headers: new AxiosHeaders({ 'PRIVATE-TOKEN': accessToken as string }),
+                httpsAgent: new https.Agent({ rejectUnauthorized: false })
+            })
+            .then(() => {
+                return res.status(200).json({ status: 200, message: "Sucesso ao se conectar com o Git" });
+            })
+            .catch(() => {
+                return res.status(500).json({ status: 500, message: "Falha ao se conectar com o Git" });
+            });
+        } catch (error) {
+            return res.status(500).json({ status: 500, message: "Falha ao se conectar com o Git" });
+        }
     }
 
     private saveGitInfo(req: Request, res: Response) {
@@ -83,6 +107,7 @@ class GitController implements ControllerInterface {
         this._router.get('/git-data-project', this.getGitDataByProjects.bind(this));
         this._router.get('/git-commits', this.getGitCommitsNumber.bind(this));
         this._router.post('/git-update', this.getGitAllData.bind(this));
+        this._router.get("/git-connection", this.getUserId.bind(this));
     }
 }
 
