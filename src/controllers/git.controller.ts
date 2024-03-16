@@ -5,15 +5,18 @@ import https from 'https';
 import { ControllerInterface } from "../interfaces/controller.interface";
 import { GitRepository } from "../repositories/git.repository";
 import { GitInstance } from "../git";
+import { TaskRepository } from "../repositories/task.repository";
 
 class GitController implements ControllerInterface {
     private _router: Router;
     private _repository: GitRepository;
+    private _taskRepository: TaskRepository;
 
     constructor() {
         this._router = Router();
         this._registerRouters();
         this._repository = new GitRepository();
+        this._taskRepository = new TaskRepository();
     }
 
     public getRouter(): Router {
@@ -54,7 +57,8 @@ class GitController implements ControllerInterface {
     private getGitInfo(req: Request, res: Response) {
         try {
             const gitData = this._repository.getConfig();
-            return res.status(200).json(gitData);
+            const taskData = this._taskRepository.getAll();
+            return res.status(200).json({ git: gitData, task: taskData });
         } catch (error) {
             return res.status(500).json({ status: 500, message: "Erro ao consultar dados do Git" });
         }

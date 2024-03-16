@@ -47,13 +47,17 @@
                         <label for="task-id" class="form-label">Número da tarefa*</label>
                         <input type="text" class="form-control" id="task-id">
                     </div>
-                    <div class="mb-3 col-4">
+                    <div class="mb-3 col-3">
                         <label for="task-period" class="form-label">Períoro da tarefa*</label>
                         <input type="text" class="form-control" id="task-period" value="01/01/2024 - 01/15/2024">
                     </div>
-                    <div class="mb-3 col-4">
+                    <div class="mb-3 col-3">
                         <label for="task-project" class="form-label">Nome do Projeto</label>
                         <input type="text" class="form-control" id="task-project">
+                    </div>
+                    <div class="mb-3 col-4">
+                        <label for="task-branch" class="form-label">Nome da Branch</label>
+                        <input type="text" class="form-control" id="task-branch">
                     </div>
                     <div class="mt-4 pt-2 col-2">
                         <button type="button" id="btn-add-task" class="btn btn-primary">Adicionar</button>
@@ -64,8 +68,9 @@
                     <thead>
                       <tr>
                         <th scope="col">Num. Tarefa</th>
-                        <th scope="col">Projeto</th>
                         <th scope="col">Períoro</th>
+                        <th scope="col">Projeto</th>
+                        <th scope="col">Branch</th>
                         <th scope="col">Ação</th>
                       </tr>
                     </thead>
@@ -127,15 +132,18 @@
         axios.get('/git-info')
         .then((res) => {
             $(".card-loading").hide();
-            if (!res.data.accessToken || !res.data.gitUrl) {
+            $(".card-setting-git").hide();
+            $(".card-tasks").hide();
+            $(".card-user").hide();
+            if (!res.data.git.accessToken || !res.data.git.gitUrl) {
                 return $(".card-setting-git").show();
             }
+            
+            if (!res.data.task || !res.data.task.length) return $(".card-tasks").show();
+
             $("#accessToken").val(res.data.accessToken);
             $("#gitUrl").val(res.data.gitUrl);
-
-            $(".card-setting-git").hide();
-            $(".card-user").hide();
-            $(".card-tasks").show();
+            $(".card-user").show();
         });
 
         // add task
@@ -146,35 +154,43 @@
             const taskId = $("#task-id").val();
             const taskProject = $("#task-project").val();
             const taskPeriod = $("#task-period").val();
+            const taskBranch = $("#task-branch").val();
 
             if (!taskId || !taskPeriod) return alert("Número da tarefa e o período são obrigatórios!");
 
             allTasksAdd.push({
-                taskId,
-                taskPeriod,
-                taskProject
+                id: taskId,
+                period: taskPeriod,
+                project: taskProject ?? null,
+                branch: taskBranch ?? null
             });
 
             renderTableTasks();
         });
         $("#btn-save-task").on('click', () => {
-            console.log(allTasksAdd)
+            axios.post('/tasks', { tasks: allTasksAdd })
+            .then(() => {
+                $(".card-setting-git").hide();
+                $(".card-tasks").hide();
+                $(".card-user").show();
+            })
+            .catch((res) => alert(res?.response?.data?.message ?? "Falha ao salvar as tasks!"))
         });
 
         function renderTableTasks() {
             $("#table-task").html('');
-            allTasksAdd.forEach(({taskId, taskPeriod, taskProject}, index) => {
+            allTasksAdd.forEach(({id, period, project, branch}, index) => {
                 $("#table-task").append(`<tr>
-                    <td>${taskId}</td>
-                    <td>${taskPeriod}</td>
-                    <td>${taskProject ?? ''}</td>
+                    <td>${id}</td>
+                    <td>${period}</td>
+                    <td>${project ?? ''}</td>
+                    <td>${branch ?? ''}</td>
                     <td><button class="btn btn-danger btn-remove-task" data-index="${index}">Remover</button></td>
                 </tr>`);
             });
             addButtonsListners();
         }
         function addButtonsListners() {
-            console.log('addButtonsListners')
             $(".btn-remove-task").off();
             $(".btn-remove-task").on("click", function() {
                 const index = $(this).attr("data-index");

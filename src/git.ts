@@ -10,12 +10,19 @@ import {
 import { BaseService } from "./service/base.service";
 import { CommitsInterface } from "./interfaces/commits.interface";
 import { PlataformaService } from "./service/plataforma.service";
+import { GitRepository } from "./repositories/git.repository";
 
 class Git {
     constructor(
         private service: BaseService,
         private plataformaService: PlataformaService
-    ) {}
+    ) {
+        if (process.env.RESET && process.env.RESET === 'true') {
+            this.saveFile([], 'git-data-commits.json');
+            this.saveFile([], 'git-all-commits.json');
+            this.saveFile([], 'git-data-projects.json');
+        }
+    }
 
     public async getAllData() {
         return new Promise(async (resolve, reject) => {
@@ -140,13 +147,15 @@ class Git {
         const month = now.getMonth();
         const year = now.getFullYear();
         const startMonth = new Date(year, month, 1).toLocaleDateString();
+        console.info('[INFO]: Consultando commits a partir de '+ startMonth);
         return this.service
             .get<Array<any>>(
-                `/users/${id}/events?action=pushed&after${startMonth}`
+                `/users/${id}/events?action=pushed&after=${startMonth}`
             )
             .then((res) => {
                 const commits: Array<CommitsInterface> = []
                 res.forEach((commit) => {
+                    // @TODO para pegar somente commit para master colocar no if abaixo '&& commit?.push_data?.ref === 'master''
                     if (commit?.project_id && commit?.push_data?.commit_to) {
                         commits.push({
                             id: commit?.id,
@@ -163,6 +172,6 @@ class Git {
     }
 }
 
-export const GitInstance = new Git(new BaseService(), new PlataformaService());
+export const GitInstance = new Git(new BaseService(new GitRepository()), new PlataformaService());
 
 

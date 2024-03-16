@@ -1,8 +1,9 @@
 # Bot para pegar todas suas alterações do mês do seu GIT
 
 ## Configuração
+- Copie o arquivo .env.local e crie um novo arquivo chamado .env
+- Deixe true para cada vez que você der start iniciar a configuração do zero
 - Rode o comando `npm install` para instalar as dependências do projeto
-- rode o comando `npm run build` para realizar o build do projeto
 
 ## Gerando o Token
 - Para gerar o token necessário para o projeto você deve abrir o gitlab e seguir os seguintes passos:
@@ -15,5 +16,5 @@
   - agora basta copiar e colar no .env do projeto
 
 ## iniciando
-- Para rodar o projeto basta realizar as etapas de configuração e rodar o comando `npm start`
+- Para rodar o projeto basta realizar as etapas de configuração e rodar o comando `npm run dev`
 - o projeto irá rodar na url: http://localhost:3000

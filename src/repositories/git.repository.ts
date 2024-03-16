@@ -7,6 +7,9 @@ export class GitRepository {
     private _config!: GitRepositoryInterface;
 
     constructor() {
+        if (process.env.RESET && process.env.RESET === 'true') {
+            this.setConfig({ accessToken: '', gitUrl: 'https://gitlab.com.br/api/v4' });
+        }
         readFile(join(__dirname + '/git.json'), 'utf-8', (err, data) => {
             if (err) {
                 return console.error('[ERROR] - coldn\'t read git.json');
@@ -20,7 +23,7 @@ export class GitRepository {
     }
 
     public setConfig({ accessToken, gitUrl }: GitRepositoryInterface): void {
-        if (accessToken && gitUrl && typeof accessToken === "string" && typeof gitUrl === "string") {
+        if (typeof accessToken === "string" && typeof gitUrl === "string") {
             this._config = { accessToken, gitUrl };
 
             writeFile(join(__dirname + '/git.json'), JSON.stringify(this._config, null, 4), (err) => {

@@ -4,7 +4,7 @@ import { GitRepository } from '../repositories/git.repository';
 import { GitRepositoryInterface } from '../interfaces/repository.interface';
 
 export class BaseService {
-    constructor() {}
+    constructor(private config: GitRepository) {}
     private httpsAgent = new https.Agent({
         rejectUnauthorized: false, // (NOTE: this will disable client verification)
       })
@@ -14,8 +14,7 @@ export class BaseService {
     }
 
     private get gitConfig(): GitRepositoryInterface {
-        const config = new GitRepository().getConfig();
-        return config;
+        return this.config.getConfig();
     }
 
     private sendRequest<T>(url: string, method: string): Promise<T> {
@@ -41,7 +40,7 @@ export class BaseService {
                     return resolve(res.data);
                 }
             }).catch((reason) => {
-                console.log(reason);
+                // console.log(reason);
                 reject(reason)
             });
         })

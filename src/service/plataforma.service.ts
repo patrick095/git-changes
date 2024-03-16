@@ -1,14 +1,17 @@
 import { FileCategoryInterface, FileFinalPtBrInterface, FileForPlataformaInterface, FileGroupByCommitAndCategory } from "../interfaces/file.interface";
+import { TaskRepository } from "../repositories/task.repository";
 
 export class PlataformaService {
+    private _taskRepository = new TaskRepository()
 
     public splitFilesByTypeForSendToPlataform(files: Array<FileForPlataformaInterface>): Array<FileFinalPtBrInterface> {
         const filesWithoutDeletedFiles: Array<FileFinalPtBrInterface> = []
         files.forEach((file) => {
             if (!file.deleted_file) {
+                const taskId = this._taskRepository.getOneBy(new Date(file.commit.created_at.split('T')[0]), file.project, file.commit.branch)?.id;
                 filesWithoutDeletedFiles.push({
                     categoria: this.getCategoryByTypeAndNewFile(file.extension, file.new_file),
-                    arquivo_com_hash: `${file.project}/${file.file}#${file.commit.sha.slice(0, 10)}`,
+                    arquivo_com_hash: `${file.project}/${file.file}#${file.commit.sha.slice(0, 10)};${taskId ?? 'SEM TASK'}`,
                     projeto: file.project,
                     branch: file.commit.branch,
                     titulo_commit: file.commit.title,
