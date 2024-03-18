@@ -13,7 +13,7 @@ export class PlataformaService {
         files: Array<FileForPlataformaInterface>
     ): Array<FileFinalPtBrInterface> {
         const filesWithoutDeletedFiles: Array<FileFinalPtBrInterface> = [];
-        const onlyOnePerTask = process.env.ONLY_ONE_PER_TASK === 'true';
+        const isNotOnlyOnePerTask = process.env.ONLY_ONE_PER_TASK === 'false';
         files.forEach((file) => {
             const taskId = this._taskRepository.getOneBy(
                 new Date(file.commit.created_at.split("T")[0]),
@@ -22,7 +22,7 @@ export class PlataformaService {
             )?.id;
             if (
                 !file.deleted_file &&
-                (!onlyOnePerTask || filesWithoutDeletedFiles.findIndex(
+                (isNotOnlyOnePerTask || filesWithoutDeletedFiles.findIndex(
                     (fileW) =>
                         fileW.arquivo_com_hash.split(";")[1] ===
                             taskId?.toString() && fileW.fileName === file.file
