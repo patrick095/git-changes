@@ -27,6 +27,7 @@ export interface FileFinalPtBrInterface {
     branch: string;
     titulo_commit: string;
     hash_commit: string;
+    fileName: string;
 }
 
 export interface FileCategoryInterface {

@@ -16,13 +16,7 @@ class Git {
     constructor(
         private service: BaseService,
         private plataformaService: PlataformaService
-    ) {
-        if (process.env.RESET && process.env.RESET === 'true') {
-            this.saveFile([], 'git-data-commits.json');
-            this.saveFile([], 'git-all-commits.json');
-            this.saveFile([], 'git-data-projects.json');
-        }
-    }
+    ) {}
 
     public async getAllData() {
         return new Promise(async (resolve, reject) => {

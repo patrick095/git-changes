@@ -2,7 +2,7 @@
 
 ## Configuração
 - Copie o arquivo .env.local e crie um novo arquivo chamado .env
-- Deixe true para cada vez que você der start iniciar a configuração do zero
+- Deixe o campo `ONLY_ONE_PER_TASK` como `true` para gerar apenas um arquivo com hash para cada tarefa
 - Rode o comando `npm install` para instalar as dependências do projeto
 
 ## Gerando o Token
