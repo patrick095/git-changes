@@ -28,6 +28,7 @@ export class PlataformaService {
                         fileW.arquivo_com_hash.split(";")[1] ===
                             taskId?.toString() && fileW.fileName === file.file
                 ) < 0)
+                && taskId
             ) {
                 filesWithoutDeletedFiles.push({
                     categoria: this.getCategoryByTypeAndNewFile(
