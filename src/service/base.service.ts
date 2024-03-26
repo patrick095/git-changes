@@ -9,18 +9,20 @@ export class BaseService {
         rejectUnauthorized: false, // (NOTE: this will disable client verification)
       })
 
-    public get<T>(url: string) {
-        return this.sendRequest<T>(`${this.gitConfig.gitUrl}${url}`, 'GET');
+    public async get<T>(url: string) {
+        const config = await this.gitConfig(); 
+        return this.sendRequest<T>(`${config.gitUrl}${url}`, 'GET');
     }
 
-    private get gitConfig(): GitRepositoryInterface {
+    private gitConfig(): Promise<GitRepositoryInterface> {
         return this.config.getConfig();
     }
 
     private sendRequest<T>(url: string, method: string): Promise<T> {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            const instance = await this.instance();
             let data: Array<T> = [];
-            this.instance.request({
+            instance.request({
                 method,
                 url
             }).then(async (res) => {
@@ -29,7 +31,7 @@ export class BaseService {
                 if (totalPages > 1) {
                     let page = parseInt(headers.get('x-page') as string);
                     for (let index = page; page <= totalPages; page++) {
-                        const res = (await this.instance.request({
+                        const res = (await instance.request({
                             method,
                             url: `${url}${url.includes('?') ? '' : '?'}&per_page=100&page=${page}`
                         }));
@@ -46,10 +48,11 @@ export class BaseService {
         })
     }
 
-    private get instance() {
+    private async instance() {
+        const config = await this.gitConfig();
         return axios.create({
             httpsAgent: this.httpsAgent,
-            headers: new AxiosHeaders({ 'PRIVATE-TOKEN': this.gitConfig.accessToken })
+            headers: new AxiosHeaders({ 'PRIVATE-TOKEN': config.accessToken })
         })
     }
 }

@@ -6,7 +6,9 @@ export class TaskRepository {
     private _fileName = 'tasks-data.json';
     private _filePath = join(__dirname, this._fileName);
 
-    constructor() {}
+    constructor() {
+        this.save([])
+    }
 
     public save(tasks: Array<TaskInterface>) {
         return writeFile(this._filePath, JSON.stringify(tasks, null, 4), (err) => {

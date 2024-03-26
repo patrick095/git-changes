@@ -54,9 +54,9 @@ class GitController implements ControllerInterface {
         }
     }
 
-    private getGitInfo(req: Request, res: Response) {
+    private async getGitInfo(req: Request, res: Response) {
         try {
-            const gitData = this._repository.getConfig();
+            const gitData = await this._repository.getConfig();
             const taskData = this._taskRepository.getAll();
             return res.status(200).json({ git: gitData, task: taskData });
         } catch (error) {
