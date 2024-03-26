@@ -49,6 +49,15 @@ export class GitRepository {
         });
     }
 
+    public getFilesByCategories() {
+        return new Promise((resolve, reject) => {
+            readFile(join(__dirname + '/git-all-category.json'), 'utf-8', (err, data) =>{
+                if (err) return reject('[ERROR] - Failed to read git-data-commits.json');
+                resolve(JSON.parse(data))
+            }); 
+        });
+    }
+
     public getCommitsNumber() {
         return new Promise((resolve, reject) => {
             readFile(join(__dirname + '/git-all-commits.json'), 'utf-8', (err, data) =>{

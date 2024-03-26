@@ -2,6 +2,7 @@ import {
     FileCategoryInterface,
     FileFinalPtBrInterface,
     FileForPlataformaInterface,
+    FileGroupByCategory,
     FileGroupByCommitAndCategory,
 } from "../interfaces/file.interface";
 import { TaskRepository } from "../repositories/task.repository";
@@ -90,6 +91,24 @@ export class PlataformaService {
             delete group.hash_commit;
             return group;
         });
+    }
+
+    public splitFilesByCategory(groups: Array<FileGroupByCommitAndCategory>): Array<FileGroupByCategory> {
+        const categories: Array<FileGroupByCategory> = [];
+        groups.forEach((group) => {
+            group.categorias.forEach((groupCategory) => {
+                const categoryIndex = categories.findIndex(({ categoria }) => categoria === groupCategory.categoria);
+                if (categoryIndex < 0) {
+                    categories.push({
+                        categoria: groupCategory.categoria,
+                        arquivos: groupCategory.arquivos
+                    })
+                    return;
+                }
+                categories[categoryIndex].arquivos.push(...groupCategory.arquivos);
+            });
+        });
+        return categories;
     }
 
     public listFilesByProjectByCategories(

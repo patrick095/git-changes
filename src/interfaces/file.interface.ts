@@ -37,8 +37,10 @@ export interface FileCategoryInterface {
 
 export interface FileGroupByCommitAndCategory {
     titulo_commit: string;
-    categorias: Array<{
-        categoria: string;
-        arquivos: Array<string>
-    }>
+    categorias: Array<FileGroupByCategory>
+}
+
+export interface FileGroupByCategory {
+    categoria: string;
+    arquivos: Array<string>;
 }

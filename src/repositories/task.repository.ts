@@ -25,7 +25,7 @@ export class TaskRepository {
             const all = JSON.parse(json) as Array<TaskInterface>;
             all.forEach((task) => {
                 const [ taskStart, taskEnd ] = task.period.split(' - ');
-                if (new Date(taskEnd) >= startMonth && new Date(taskEnd) <= now) {
+                if (new Date(taskEnd) >= startMonth) {
                     allFromMonth.push(task);
                 }
             });

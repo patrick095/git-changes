@@ -84,6 +84,16 @@ class GitController implements ControllerInterface {
         }
     }
 
+    private async getGitDataByCategory(req: Request, res: Response) {
+        try {
+            const gitData = await this._repository.getFilesByCategories();
+            if (!gitData) throw new Error();
+            return res.status(200).json(gitData);
+        } catch (error) {
+            return res.status(500).json({ status: 500, message: "Erro ao consultar dados, verificar se já atualizou os dados com o git."});
+        }
+    }
+
     private async getGitCommitsNumber(req: Request, res: Response) {
         try {
             const commitNumbers = await this._repository.getCommitsNumber();
@@ -109,6 +119,7 @@ class GitController implements ControllerInterface {
         this._router.get("/git-info", this.getGitInfo.bind(this));
         this._router.get('/git-data-commit', this.getGitDataByCommits.bind(this));
         this._router.get('/git-data-project', this.getGitDataByProjects.bind(this));
+        this._router.get('/git-data-category', this.getGitDataByCategory.bind(this));
         this._router.get('/git-commits', this.getGitCommitsNumber.bind(this));
         this._router.post('/git-update', this.getGitAllData.bind(this));
         this._router.get("/git-connection", this.getUserId.bind(this));

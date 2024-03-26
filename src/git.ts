@@ -16,7 +16,12 @@ class Git {
     constructor(
         private service: BaseService,
         private plataformaService: PlataformaService
-    ) {}
+    ) {
+        this.saveFile([], 'git-data-commits.json');
+        this.saveFile([], 'git-all-commits.json');
+        this.saveFile([], 'git-all-category.json');
+        this.saveFile([], 'git-data-projects.json');
+    }
 
     public async getAllData() {
         return new Promise(async (resolve, reject) => {
@@ -24,6 +29,7 @@ class Git {
             const userId = await this.getUserId()
                 .catch((err) => {
                     console.error("[ERROR] - Failed to connect to Git!");
+                    console.error(err)
                     reject();
                     return 0;
                 });
@@ -52,7 +58,8 @@ class Git {
     
             this.saveFile(finalFormatedFiles, 'git-data-commits.json');
             this.saveFile(commits, 'git-all-commits.json');
-            this.saveFile(this.plataformaService.listFilesByProjectByCategories(finalFormatedFiles), 'git-data-projects.json')
+            this.saveFile(this.plataformaService.splitFilesByCategory(finalFormatedFiles), 'git-all-category.json');
+            this.saveFile(this.plataformaService.listFilesByProjectByCategories(finalFormatedFiles), 'git-data-projects.json');
             resolve(true);
         });
     }
