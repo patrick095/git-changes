@@ -465,8 +465,7 @@
                 const commits = await axios
                     .get("/git-commits")
                     .catch((err) => console.error(err));
-
-                if (dataByCategories) {
+                if (dataByCategories.data && dataByCategories.data.length > 0) {
                     $('#btn-download-json').prop('disabled', false);
                     $("#user-data-status").text("Dados Sincronizados");
                     $("#user-git-commits").text(commits.data.commits);
@@ -522,7 +521,8 @@
                     new Blob([JSON.stringify(json, null, 4)], {type:"application/json"})
                 )
                 a.download = "entrega.json";
-                a.click()
+                a.click();
+                alert('Atenção! Você deve inserir os valores da of no json baixado para poder efetuar a entrega corretamente!');
             })
         });
     </script>
