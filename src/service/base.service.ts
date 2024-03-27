@@ -11,9 +11,9 @@ export class BaseService {
         rejectUnauthorized: false, // (NOTE: this will disable client verification)
       })
 
-    public async get<T>(url: string) {
+    public async get<T>(url: string, customBaseUrl = '') {
         const config = await this.gitConfig(); 
-        return this.sendRequest<T>(`${config.gitUrl}${url}`, 'GET');
+        return this.sendRequest<T>(`${customBaseUrl !== '' ? customBaseUrl : config.gitUrl}${url}`, 'GET');
     }
 
     private gitConfig(): Promise<GitRepositoryInterface> {

@@ -32,7 +32,7 @@ export class GitController implements ControllerInterface {
 
             if (!accessToken || !gitUrl) return res.status(500).json({ status: 500, message: "Dados inválidos" });
 
-            this.service.get('/user')
+            this.service.get('/user', gitUrl as string)
             .then(() => {
                 return res.status(200).json({ status: 200, message: "Sucesso ao se conectar com o Git" });
             })
