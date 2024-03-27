@@ -1,4 +1,4 @@
-import { readFileSync, writeFile, writeFileSync } from "fs";
+import { readFileSync, writeFile } from "fs";
 import { TaskInterface } from "../interfaces/tasks.interface";
 import { join } from "path";
 
@@ -6,9 +6,7 @@ export class TaskRepository {
     private _fileName = 'tasks-data.json';
     private _filePath = join(__dirname, this._fileName);
 
-    constructor() {
-        this.save([])
-    }
+    constructor() {}
 
     public save(tasks: Array<TaskInterface>) {
         return writeFile(this._filePath, JSON.stringify(tasks, null, 4), (err) => {

@@ -43,4 +43,31 @@ export interface FileGroupByCommitAndCategory {
 export interface FileGroupByCategory {
     categoria: string;
     arquivos: Array<string>;
+    descricao: string;
+    pontuacao?: number;
 }
+
+export interface GitInfoInterface {
+    id: string
+    short_id: string
+    created_at: string
+    parent_ids: string[]
+    title: string
+    message: string
+    author_name: string
+    author_email: string
+    authored_date: string
+    committer_name: string
+    committer_email: string
+    committed_date: string
+    trailers: any
+    web_url: string
+    stats: {
+        additions: number
+        deletions: number
+        total: number
+      }
+    status: any
+    project_id: number
+    last_pipeline: any
+  }

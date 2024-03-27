@@ -1,8 +1,11 @@
 import express, { Application } from 'express';
 import { ControllerInterface } from './interfaces/controller.interface';
 import { staticController } from './controllers/static.controller';
-import { gitController } from './controllers/git.controller';
+import { GitController } from './controllers/git.controller';
 import bodyParser from 'body-parser';
+import { BaseService } from './service/base.service';
+import { GitRepository } from './repositories/git.repository';
+import { RequestCache } from './utils/request-cache.util';
 
 export class Server {
     private _server: Application;
@@ -14,7 +17,7 @@ export class Server {
         this._port = process.env.PORT ? parseInt(process.env.PORT) : 3000;
         this._controllers = [
             staticController,
-            gitController
+            new GitController(new BaseService(new GitRepository(), new RequestCache()))
         ];
     }
 

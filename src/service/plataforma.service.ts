@@ -14,7 +14,7 @@ export class PlataformaService {
         files: Array<FileForPlataformaInterface>
     ): Array<FileFinalPtBrInterface> {
         const filesWithoutDeletedFiles: Array<FileFinalPtBrInterface> = [];
-        const isNotOnlyOnePerTask = process.env.ONLY_ONE_PER_TASK === 'false';
+        const isNotOnlyOnePerTask = process.env.ONLY_ONE_PER_TASK === "false";
         files.forEach((file) => {
             const taskId = this._taskRepository.getOneBy(
                 new Date(file.commit.created_at.split("T")[0]),
@@ -23,12 +23,14 @@ export class PlataformaService {
             )?.id;
             if (
                 !file.deleted_file &&
-                (isNotOnlyOnePerTask || filesWithoutDeletedFiles.findIndex(
-                    (fileW) =>
-                        fileW.arquivo_com_hash.split(";")[1] ===
-                            taskId?.toString() && fileW.fileName === file.file
-                ) < 0)
-                && taskId
+                (isNotOnlyOnePerTask ||
+                    filesWithoutDeletedFiles.findIndex(
+                        (fileW) =>
+                            fileW.arquivo_com_hash.split(";")[1] ===
+                                taskId?.toString() &&
+                            fileW.fileName === file.file
+                    ) < 0) &&
+                taskId
             ) {
                 filesWithoutDeletedFiles.push({
                     categoria: this.getCategoryByTypeAndNewFile(
@@ -94,21 +96,29 @@ export class PlataformaService {
         });
     }
 
-    public splitFilesByCategory(groups: Array<FileGroupByCommitAndCategory>): Array<FileGroupByCategory> {
+    public splitFilesByCategory(
+        files: Array<FileFinalPtBrInterface>
+    ): Array<FileGroupByCategory> {
         const categories: Array<FileGroupByCategory> = [];
-        groups.forEach((group) => {
-            group.categorias.forEach((groupCategory) => {
-                const categoryIndex = categories.findIndex(({ categoria }) => categoria === groupCategory.categoria);
-                if (categoryIndex < 0) {
-                    categories.push({
-                        categoria: groupCategory.categoria,
-                        arquivos: groupCategory.arquivos
-                    })
-                    return;
-                }
-                categories[categoryIndex].arquivos.push(...groupCategory.arquivos);
-            });
+        files.forEach((file) => {
+            const categoryIndex = categories.findIndex(
+                ({ categoria }) => categoria === file.categoria.code
+            );
+            if (categoryIndex < 0) {
+                categories.push({
+                    categoria: file.categoria.code,
+                    descricao: file.categoria.description,
+                    arquivos: [file.arquivo_com_hash],
+                });
+                return;
+            }
+            categories[categoryIndex].arquivos.push(
+                file.arquivo_com_hash
+            );
         });
+        categories.forEach((category) => {
+            category.pontuacao = this.getPointByCategory(category.categoria) * category.arquivos.length;
+        })
         return categories;
     }
 
@@ -261,5 +271,52 @@ export class PlataformaService {
                     description: "Arquivo não Mapeado ainda.",
                 };
         }
+    }
+
+    private getPointByCategory(category: string): number {
+        switch (category) {
+             case "5.10.1": 
+                return 10;
+             case "5.10.2": 
+                return 5;
+             case "5.10.3": 
+                return 16;
+             case "5.10.4": 
+                return 8;
+             case "5.10.5": 
+                return 10;
+             case "5.10.6": 
+                return 5;
+             case "5.10.7": 
+                return 2.5;
+             case "5.10.8": 
+                return 1.5;
+             case "5.10.9": 
+                return 5.5;
+             case "5.10.10": 
+                return 3.5;
+             case "5.10.18": 
+                return 8;
+             case "5.10.21": 
+                return 4;
+             case "5.15.7": 
+                return 8;
+             case "5.15.8": 
+                return 4;
+             case "5.15.9": 
+                return 8;
+             case "5.15.10": 
+                return 4;
+             case "5.15.1": 
+                return 8;
+             case "5.15.2": 
+                return 4;
+             case "5.26.3": 
+                return 5;
+             case "5.26.2": 
+                return 3;
+            default:
+                return 0;
+        };
     }
 }

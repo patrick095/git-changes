@@ -1,22 +1,25 @@
 import { Request, Response, Router } from "express";
-import axios, { AxiosHeaders } from "axios";
 import https from 'https';
 
 import { ControllerInterface } from "../interfaces/controller.interface";
 import { GitRepository } from "../repositories/git.repository";
-import { GitInstance } from "../git";
 import { TaskRepository } from "../repositories/task.repository";
+import { BaseService } from "../service/base.service";
+import { Git } from "../git";
+import { PlataformaService } from "../service/plataforma.service";
 
-class GitController implements ControllerInterface {
+export class GitController implements ControllerInterface {
     private _router: Router;
     private _repository: GitRepository;
     private _taskRepository: TaskRepository;
+    private _gitInstance: Git;
 
-    constructor() {
+    constructor(private service: BaseService) {
         this._router = Router();
         this._registerRouters();
         this._repository = new GitRepository();
         this._taskRepository = new TaskRepository();
+        this._gitInstance = new Git(this.service, new PlataformaService())
     }
 
     public getRouter(): Router {
@@ -29,10 +32,7 @@ class GitController implements ControllerInterface {
 
             if (!accessToken || !gitUrl) return res.status(500).json({ status: 500, message: "Dados inválidos" });
 
-            axios.get<{ id: number }>(`${gitUrl}/user`, {
-                headers: new AxiosHeaders({ 'PRIVATE-TOKEN': accessToken as string }),
-                httpsAgent: new https.Agent({ rejectUnauthorized: false })
-            })
+            this.service.get('/user')
             .then(() => {
                 return res.status(200).json({ status: 200, message: "Sucesso ao se conectar com o Git" });
             })
@@ -105,7 +105,7 @@ class GitController implements ControllerInterface {
     }
 
     private async getGitAllData(req: Request, res: Response) {
-            GitInstance.getAllData()
+            this._gitInstance.getAllData()
             .then(() => {
                 return res.status(200).json({ message: 'Dados atualizados com sucesso!'})
             })
@@ -125,5 +125,3 @@ class GitController implements ControllerInterface {
         this._router.get("/git-connection", this.getUserId.bind(this));
     }
 }
-
-export const gitController = new GitController();

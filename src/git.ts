@@ -6,13 +6,15 @@ dotenv.config();
 import {
     FileForPlataformaInterface,
     FileGitlabInterface,
+    GitInfoInterface,
 } from "./interfaces/file.interface";
 import { BaseService } from "./service/base.service";
 import { CommitsInterface } from "./interfaces/commits.interface";
 import { PlataformaService } from "./service/plataforma.service";
 import { GitRepository } from "./repositories/git.repository";
+import { RequestCache } from "./utils/request-cache.util";
 
-class Git {
+export class Git {
     constructor(
         private service: BaseService,
         private plataformaService: PlataformaService
@@ -26,13 +28,16 @@ class Git {
     public async getAllData() {
         return new Promise(async (resolve, reject) => {
             console.info('[INFO]: iniciando Bot para pegar suas alterações do mês no Git');
-            const userId = await this.getUserId()
+            const user = await this.getUser()
                 .catch((err) => {
                     console.error("[ERROR] - Failed to connect to Git!");
                     console.error(err)
                     reject();
-                    return 0;
+                    return {
+                        id: 0
+                    }
                 });
+            const userId = user.id;
     
             const commits = await this.getUserCommitsIds(userId)
                 .catch((err) => {
@@ -58,7 +63,7 @@ class Git {
     
             this.saveFile(finalFormatedFiles, 'git-data-commits.json');
             this.saveFile(commits, 'git-all-commits.json');
-            this.saveFile(this.plataformaService.splitFilesByCategory(finalFormatedFiles), 'git-all-category.json');
+            this.saveFile(this.plataformaService.splitFilesByCategory(formatedFiles), 'git-all-category.json');
             this.saveFile(this.plataformaService.listFilesByProjectByCategories(finalFormatedFiles), 'git-data-projects.json');
             resolve(true);
         });
@@ -95,7 +100,16 @@ class Git {
                     const projectName = await this.getProjectName(
                         commits[index].project_id
                     );
-                    await this.getCommitInfo(
+                    const commitInfo = await this.getCommitInfo(
+                        commits[index].project_id,
+                        commits[index].sha
+                    );
+
+                    if (commitInfo.parent_ids.length > 1) {
+                        continue;
+                    }
+
+                    await this.getCommitDiff(
                         commits[index].project_id,
                         commits[index].sha
                     )
@@ -115,7 +129,7 @@ class Git {
                                 });
                             });
                         })
-                        .catch((reason) => console.log(reason));
+                        .catch((reason) => console.error('[ERROR]: getCommitDiff', reason));
                 } else {
                     console.log("commit incompleto", commits[index]);
                 }
@@ -125,15 +139,19 @@ class Git {
         return [];
     }
 
-    private getUserId(): Promise<number> {
-        return this.service.get<{ id: number }>(`/user`).then((res) => {
-            return res.id ?? "";
-        });
+    private getUser() {
+        return this.service.get<{ id: number; commit_email: string; name: string; username: string }>(`/user`);
+    }
+
+    private getCommitDiff(project_id: number, sha: string) {
+        return this.service.get<Array<FileGitlabInterface>>(
+            `/projects/${project_id}/repository/commits/${sha}/diff`
+        );
     }
 
     private getCommitInfo(project_id: number, sha: string) {
-        return this.service.get<Array<FileGitlabInterface>>(
-            `/projects/${project_id}/repository/commits/${sha}/diff`
+        return this.service.get<GitInfoInterface>(
+            `/projects/${project_id}/repository/commits/${sha}`
         );
     }
 
@@ -172,7 +190,5 @@ class Git {
             });
     }
 }
-
-export const GitInstance = new Git(new BaseService(new GitRepository()), new PlataformaService());
 
 

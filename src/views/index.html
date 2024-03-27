@@ -40,6 +40,34 @@
     <body>
         <div class="container-fluid p-5">
             <div class="card m-5">
+                <nav aria-label="breadcrumb" class="px-5 pt-5">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a
+                                href="#"
+                                class="breadcrumb-item-link"
+                                data-card="card-setting-git"
+                                >Configuração Git</a
+                            >
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a
+                                href="#"
+                                class="breadcrumb-item-link"
+                                data-card="card-tasks"
+                                >Tasks</a
+                            >
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a
+                                href="#"
+                                class="breadcrumb-item-link"
+                                data-card="card-user"
+                                >Relatório</a
+                            >
+                        </li>
+                    </ol>
+                </nav>
                 <div class="card-body card-loading flex justify-content-center">
                     Carregando...
                 </div>
@@ -173,7 +201,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body card-user none">
+                <div class="card-body card-user p-5 none">
                     <h1>Relatórios</h1>
                     <div>
                         <ul>
@@ -191,6 +219,12 @@
                             <li>
                                 Commits esse mês:
                                 <span id="user-git-commits">0</span>
+                            </li>
+                            <li>
+                                <b>
+                                    Pontuação total no mês:
+                                    <span id="user-git-points">0</span>
+                                </b>
                             </li>
                         </ul>
 
@@ -237,30 +271,44 @@
     </body>
     <script>
         $(() => {
-            axios.get("/git-info").then((res) => {
+            const allTasksAdd = [];
+            $(".breadcrumb-item-link").on("click", function () {
+                const card = $(this).data("card");
+                navigate(card);
+            });
+
+            function navigate(card) {
+                $(".breadcrumb-item-link").removeClass("active");
+                $(`[data-card=${card}]`).addClass("active");
                 $(".card-loading").hide();
                 $(".card-setting-git").hide();
                 $(".card-tasks").hide();
                 $(".card-user").hide();
+                $(`.${card}`).show();
+            }
+
+            axios.get("/git-info").then((res) => {
+                navigate("init");
+                allTasksAdd.push(...res.data.task);
+                renderTableTasks();
+                $("#accessToken").val(res.data.git.accessToken);
+                $("#gitUrl").val(res.data.git.gitUrl);
                 if (!res.data.git.accessToken || !res.data.git.gitUrl) {
-                    return $(".card-setting-git").show();
+                    return navigate("card-setting-git");
                 }
 
                 if (!res.data.task || !res.data.task.length)
-                    return $(".card-tasks").show();
+                    return navigate("card-tasks");
 
-                $("#accessToken").val(res.data.accessToken);
-                $("#gitUrl").val(res.data.gitUrl);
-                $(".card-user").show();
+                navigate("card-user");
                 getUserDataOnGit();
             });
 
             // add task
             const now = new Date();
             $("#task-period").daterangepicker({
-                minDate: new Date(now.getFullYear(), now.getMonth(), 1)
+                minDate: new Date(now.getFullYear(), now.getMonth(), 1),
             });
-            const allTasksAdd = [];
             $("#btn-add-task").on("click", () => {
                 const taskId = $("#task-id").val();
                 const taskProject = $("#task-project").val();
@@ -285,9 +333,7 @@
                 axios
                     .post("/tasks", { tasks: allTasksAdd })
                     .then(() => {
-                        $(".card-setting-git").hide();
-                        $(".card-tasks").hide();
-                        $(".card-user").show();
+                        navigate("card-user");
                     })
                     .catch((res) =>
                         alert(
@@ -316,7 +362,6 @@
                 $(".btn-remove-task").off();
                 $(".btn-remove-task").on("click", function () {
                     const index = $(this).attr("data-index");
-                    console.log(index);
                     if (index !== undefined && index !== null && index !== "") {
                         allTasksAdd.splice(index, 1);
                         renderTableTasks();
@@ -370,9 +415,7 @@
                         gitUrl,
                     })
                     .then((res) => {
-                        $(".card-setting-git").hide();
-                        $(".card-user").hide();
-                        $(".card-tasks").show();
+                        navigate("card-tasks");
                     })
                     .catch((error) => {
                         alert(
@@ -386,6 +429,7 @@
             });
 
             $("#btn-atualizar-dados-git").on("click", () => {
+                $("#user-report").html("");
                 const originalText = $("#btn-atualizar-dados-git").text();
                 $("#btn-atualizar-dados-git")
                     .prop("disabled", true)
@@ -398,8 +442,7 @@
                         alert(
                             "Falha ao atualizar dados do GIT, favor verificar os dados de configuração do GIT!"
                         );
-                        $(".card-setting-git").show();
-                        $(".card-user").hide();
+                        navigate("card-setting-git");
                     })
                     .then(() =>
                         $("#btn-atualizar-dados-git")
@@ -421,28 +464,31 @@
                     $("#user-data-status").text("Dados Sincronizados");
                     $("#user-git-commits").text(commits.data.commits);
                     const divReport = $("#user-report");
+                    let pontuacaoTotal = 0;
                     dataByCategories.data.forEach((category, index) => {
+                        pontuacaoTotal += category.pontuacao;
                         divReport.append(`
                         <div class="accordion-item">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button"
                                 data-bs-toggle="collapse" data-bs-target="#report-category-${index}" aria-expanded="false" aria-controls="report-category-${index}">
-                                ${category.categoria}
+                                ${category.categoria} - ${category.descricao} (<b>${category.pontuacao} pontos</b>)
                                 </button>
                             </h2>
                             <div id="report-category-${index}" class="accordion-collapse collapse" data-bs-parent="#user-report">
-                                <div class="accordion-body">
-                                    <div class="mb-3 col-8">
-                                        <textarea type="text" class="form-control" id="categoria-${index}">${category.arquivos.join(
-                            "\n"
-                        )}</textarea>
-                                        <button type="button" data-index="${index}" class="btn btn-primary btn-copiar">Copiar</button>
+                                <div class="accordion-body d-flex">
+                                    <div class="mb-3 col-10">
+                                        <textarea type="text" class="form-control" id="categoria-${index}">${category.arquivos.join("\n")}</textarea>
+                                    </div>
+                                    <div class="mx-5">
+                                        <button type="button" data-index="${index}" class="btn btn-primary btn-copiar px-4">Copiar</button>
                                     </div>
                                 </div>
                             </div>
                             </div>
                         </div>
                     `);
+                    $('#user-git-points').text(pontuacaoTotal);
                     });
                 }
                 $("#user-status").text("Atualizado.");
@@ -450,11 +496,16 @@
                     const button = $(this);
                     const categoria = button.data("index");
                     const textarea = $(`#categoria-${categoria}`);
-                    console.log(categoria, textarea, textarea.val());
                     textarea.select();
                     navigator.clipboard.writeText(textarea.val());
                     button.text("Copiado!");
                     button.prop("disabled", true);
+                });
+                $("textarea").each(function () {
+                    const lines = ($(this).val().match(/\n/g) ?? []).length + 1;
+                    const height = `${lines * 24 + 14}px`;
+                    console.log(height);
+                    $(this).height(height);
                 });
             };
         });
@@ -463,9 +514,6 @@
         .card {
             min-width: 50vw;
             min-height: 70vh;
-        }
-        .card-body {
-            align-items: center;
         }
         .card-body form {
             width: 100%;

@@ -2,9 +2,11 @@ import axios, { AxiosHeaders } from 'axios';
 import https from 'https';
 import { GitRepository } from '../repositories/git.repository';
 import { GitRepositoryInterface } from '../interfaces/repository.interface';
+import { RequestCache } from '../utils/request-cache.util';
 
 export class BaseService {
-    constructor(private config: GitRepository) {}
+    constructor(private config: GitRepository, private _cache: RequestCache) {}
+
     private httpsAgent = new https.Agent({
         rejectUnauthorized: false, // (NOTE: this will disable client verification)
       })
@@ -20,6 +22,11 @@ export class BaseService {
 
     private sendRequest<T>(url: string, method: string): Promise<T> {
         return new Promise(async (resolve, reject) => {
+
+            if (this._cache.hasCache((res: T) => {
+                resolve(res);
+            }, url, method)) return;
+
             const instance = await this.instance();
             let data: Array<T> = [];
             instance.request({
@@ -37,12 +44,13 @@ export class BaseService {
                         }));
                         data = data.concat(res.data as Array<T>);
                     }
+                    this._cache.set(url, method, data);
                     return resolve(data as T);
                 } else {
+                    this._cache.set(url, method, res.data);
                     return resolve(res.data);
                 }
             }).catch((reason) => {
-                // console.log(reason);
                 reject(reason)
             });
         })
