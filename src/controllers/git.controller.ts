@@ -34,6 +34,8 @@ export class GitController implements ControllerInterface {
             const { accessToken, gitUrl } = req.query;
 
             if (!accessToken || !gitUrl) return res.status(500).json({ status: 500, message: "Dados inválidos" });
+            
+            this._repository.setConfig({ accessToken: accessToken as string, gitUrl: gitUrl as string });
 
             this.service.get('/user', gitUrl as string)
             .then(() => {
