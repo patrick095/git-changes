@@ -5,9 +5,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Entrega de OFs</title>
         <script
-            src="https://code.jquery.com/jquery-3.7.1.min.js"
-            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+            integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
             crossorigin="anonymous"
+            referrerpolicy="no-referrer"
         ></script>
         <link
             rel="stylesheet"
@@ -223,14 +224,35 @@
                                 </b>
                             </li>
                             <li>
-                                JSON para entrega: 
-                                <button type="button" class="btn btn-outline-primary" id="btn-download-json" disabled>
-                                    Download <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
-                                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
-                                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                                JSON para entrega:
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-primary"
+                                    id="btn-download-json"
+                                    disabled
+                                >
+                                    Download
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="16"
+                                        height="16"
+                                        fill="currentColor"
+                                        class="bi bi-download"
+                                        viewBox="0 0 16 16"
+                                    >
+                                        <path
+                                            d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"
+                                        />
+                                        <path
+                                            d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"
+                                        />
                                     </svg>
                                 </button>
-                                <a href="#" class="d-none" id="link-download"></a>
+                                <a
+                                    href="#"
+                                    class="d-none"
+                                    id="link-download"
+                                ></a>
                             </li>
                         </ul>
 
@@ -466,7 +488,7 @@
                     .get("/git-commits")
                     .catch((err) => console.error(err));
                 if (dataByCategories.data && dataByCategories.data.length > 0) {
-                    $('#btn-download-json').prop('disabled', false);
+                    $("#btn-download-json").prop("disabled", false);
                     $("#user-data-status").text("Dados Sincronizados");
                     $("#user-git-commits").text(commits.data.commits);
                     const divReport = $("#user-report");
@@ -478,13 +500,17 @@
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button"
                                 data-bs-toggle="collapse" data-bs-target="#report-category-${index}" aria-expanded="false" aria-controls="report-category-${index}">
-                                ${category.categoria} - ${category.descricao} (<b>${category.pontuacao} pontos</b>)
+                                ${category.categoria} - ${
+                            category.descricao
+                        } (<b>${category.pontuacao} pontos</b>)
                                 </button>
                             </h2>
                             <div id="report-category-${index}" class="accordion-collapse collapse" data-bs-parent="#user-report">
                                 <div class="accordion-body d-flex">
                                     <div class="mb-3 col-10">
-                                        <textarea type="text" class="form-control" id="categoria-${index}">${category.arquivos.join("\n")}</textarea>
+                                        <textarea type="text" class="form-control" id="categoria-${index}">${category.arquivos.join(
+                            "\n"
+                        )}</textarea>
                                     </div>
                                     <div class="mx-5">
                                         <button type="button" data-index="${index}" class="btn btn-primary btn-copiar px-4">Copiar</button>
@@ -494,7 +520,7 @@
                             </div>
                         </div>
                     `);
-                    $('#user-git-points').text(pontuacaoTotal);
+                        $("#user-git-points").text(pontuacaoTotal);
                     });
                 }
                 $("#user-status").text("Atualizado.");
@@ -514,16 +540,22 @@
                 });
             };
 
-            $('#btn-download-json').on('click', async function() {
-                const json = await axios.get("/git-json-download").then((res) => res.data);
-                var a = document.createElement("a")
+            $("#btn-download-json").on("click", async function () {
+                const json = await axios
+                    .get("/git-json-download")
+                    .then((res) => res.data);
+                var a = document.createElement("a");
                 a.href = URL.createObjectURL(
-                    new Blob([JSON.stringify(json, null, 4)], {type:"application/json"})
-                )
+                    new Blob([JSON.stringify(json, null, 4)], {
+                        type: "application/json",
+                    })
+                );
                 a.download = "entrega.json";
                 a.click();
-                alert('Atenção! Você deve inserir os valores da of no json baixado para poder efetuar a entrega corretamente!');
-            })
+                alert(
+                    "Atenção! Você deve inserir os valores da of no json baixado para poder efetuar a entrega corretamente!"
+                );
+            });
         });
     </script>
     <style>
