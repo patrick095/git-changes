@@ -8,7 +8,7 @@ export class BaseService {
     constructor(private config: GitRepository, private _cache: RequestCache) {}
 
     private httpsAgent = new https.Agent({
-        rejectUnauthorized: false, // (NOTE: this will disable client verification)
+        rejectUnauthorized: true,
       })
 
     public async get<T>(url: string, customBaseUrl = ''): Promise<T> {
@@ -83,6 +83,7 @@ export class BaseService {
             headers: new AxiosHeaders({
                 Authorization: `Bearer ${config.accessToken}`,
             }),
+            proxy: false,
         });
     }
 }
