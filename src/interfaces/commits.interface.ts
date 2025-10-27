@@ -1,8 +1,9 @@
 export interface CommitsInterface {
-    id: number;
-    project_id: number;
+    sha: string;
+    repository: string;
+    organization: string;
     branch: string;
     title: string;
-    sha: string;
     created_at: string;
+    html_url: string;
 }

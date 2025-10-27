@@ -90,7 +90,7 @@
                                 type="text"
                                 class="form-control"
                                 id="gitUrl"
-                                placeholder="https://gitlab.com.br/api/v4"
+                                placeholder="https://api.github.com"
                             />
                         </div>
                         <div class="mb-3">
@@ -102,6 +102,17 @@
                                 class="form-control"
                                 id="accessToken"
                             />
+                        </div>
+                        <div class="mb-3">
+                            <label for="organizations" class="form-label"
+                                >Organizações (uma por linha)</label
+                            >
+                            <textarea
+                                class="form-control"
+                                id="organizations"
+                                rows="3"
+                                placeholder="minha-organizacao-1&#10;minha-organizacao-2"
+                            ></textarea>
                         </div>
                         <div class="d-flex">
                             <button
@@ -321,6 +332,9 @@
                 renderTableTasks();
                 $("#accessToken").val(res.data.git.accessToken);
                 $("#gitUrl").val(res.data.git.gitUrl);
+                $("#organizations").val(
+                    (res.data.git.organizations || []).join("\n")
+                );
                 if (!res.data.git.accessToken || !res.data.git.gitUrl) {
                     return navigate("card-setting-git");
                 }
@@ -428,7 +442,11 @@
             $("#btn-salvar-dados-git").on("click", () => {
                 const accessToken = $("#accessToken").val();
                 const gitUrl = $("#gitUrl").val();
-
+                const organizations = $("#organizations")
+                    .val()
+                    .split(/\n|,/)
+                    .map((org) => org.trim());
+                console.log(organizations);
                 if (!accessToken || !gitUrl) {
                     return alert(
                         "Você precisa preencher os campos corretamente para poder salvar os dados!"
@@ -441,6 +459,7 @@
                     .post("/git-info", {
                         accessToken,
                         gitUrl,
+                        organizations,
                     })
                     .then((res) => {
                         navigate("card-tasks");

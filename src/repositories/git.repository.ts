@@ -15,15 +15,28 @@ export class GitRepository {
                     reject();
                     return console.error('[ERROR] - coldn\'t read git.json');
                 }
-                const config = data ? JSON.parse(data) as GitRepositoryInterface : { accessToken: '', gitUrl: '' };
+                const config = data
+                    ? (JSON.parse(data) as GitRepositoryInterface)
+                    : { accessToken: '', gitUrl: '', organizations: [] };
+
+                if (!config.organizations) {
+                    config.organizations = [];
+                }
                 resolve(config);
             });
         });
     }
 
-    public setConfig({ accessToken, gitUrl }: GitRepositoryInterface): void {
+    public setConfig({ accessToken, gitUrl, organizations }: GitRepositoryInterface): void {
         if (typeof accessToken === "string" && typeof gitUrl === "string") {
-            const config = { accessToken, gitUrl };
+            const sanitizedOrganizations = Array.isArray(organizations)
+                ? organizations.filter(Boolean)
+                : [];
+            const config = {
+                accessToken,
+                gitUrl,
+                organizations: sanitizedOrganizations,
+            };
 
             writeFile(join(__dirname + '/git.json'), JSON.stringify(config, null, 4), (err) => {
                 if (err) {

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "npm run build && node dist/index.js",
     "build": "tsc",
     "postbuild": "copyfiles -f ./src/**/*.html dist/views",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",

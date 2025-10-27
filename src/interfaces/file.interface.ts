@@ -1,14 +1,13 @@
 import { CommitsInterface } from "./commits.interface";
 
-export interface FileGitlabInterface {
-    old_path: string;
-    new_path: string;
-    a_mode: string;
-    b_mode: string;
-    new_file: boolean;
-    renamed_file: boolean;
-    deleted_file: boolean;
-    diff: string;
+export interface GithubCommitFileInterface {
+    filename: string;
+    status: string;
+    additions: number;
+    deletions: number;
+    changes: number;
+    previous_filename?: string;
+    patch?: string;
 }
 
 export interface FileForPlataformaInterface {
@@ -47,27 +46,22 @@ export interface FileGroupByCategory {
     pontuacao?: number;
 }
 
-export interface GitInfoInterface {
-    id: string
-    short_id: string
-    created_at: string
-    parent_ids: string[]
-    title: string
-    message: string
-    author_name: string
-    author_email: string
-    authored_date: string
-    committer_name: string
-    committer_email: string
-    committed_date: string
-    trailers: any
-    web_url: string
-    stats: {
-        additions: number
-        deletions: number
-        total: number
-      }
-    status: any
-    project_id: number
-    last_pipeline: any
-  }
+export interface GithubCommitDetailInterface {
+    sha: string;
+    html_url: string;
+    commit: {
+        message: string;
+        author?: {
+            name: string;
+            email: string;
+            date: string;
+        } | null;
+        committer?: {
+            name: string;
+            email: string;
+            date: string;
+        } | null;
+    };
+    parents: Array<{ sha: string }>;
+    files: Array<GithubCommitFileInterface>;
+}

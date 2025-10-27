@@ -29,22 +29,34 @@ export class GitController implements ControllerInterface {
         return this._router;
     }
 
-    private getUserId(req: Request, res: Response) {
+    private async getUserId(req: Request, res: Response) {
         try {
             const { accessToken, gitUrl } = req.query;
 
             if (!accessToken || !gitUrl) return res.status(500).json({ status: 500, message: "Dados inválidos" });
-            
-            this._repository.setConfig({ accessToken: accessToken as string, gitUrl: gitUrl as string });
+
+            const currentConfig = await this._repository.getConfig().catch(() => ({
+                accessToken: '',
+                gitUrl: '',
+                organizations: [],
+            }));
+
+            this._repository.setConfig({
+                accessToken: accessToken as string,
+                gitUrl: gitUrl as string,
+                organizations: currentConfig?.organizations ?? [],
+            });
 
             this.service.get('/user', gitUrl as string)
             .then(() => {
                 return res.status(200).json({ status: 200, message: "Sucesso ao se conectar com o Git" });
             })
-            .catch(() => {
-                return res.status(500).json({ status: 500, message: "Falha ao se conectar com o Git" });
+            .catch((error) => {
+                console.log(error);
+                return res.status(401).json({ status: 500, message: "Falha ao se conectar com o Git" });
             });
         } catch (error) {
+            console.log(error);
             return res.status(500).json({ status: 500, message: "Falha ao se conectar com o Git" });
         }
     }
@@ -52,7 +64,14 @@ export class GitController implements ControllerInterface {
     private saveGitInfo(req: Request, res: Response) {
         try {
             const body = req.body;
-            this._repository.setConfig(body);
+            const organizations = Array.isArray(body.organizations)
+                ? body.organizations.filter((org: unknown) => typeof org === 'string' && org.trim().length)
+                : [];
+            this._repository.setConfig({
+                accessToken: body.accessToken,
+                gitUrl: body.gitUrl,
+                organizations,
+            });
             return res.status(200).json({ status: 200, message: "Dados salvos com sucesso!" })
         } catch (error) {
             return res.status(500).json({ status: 500, message: "Erro ao salvar os dados do Git" })
