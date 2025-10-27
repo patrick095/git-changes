@@ -27,3 +27,24 @@
   - Autoriza para o token acessar a organização
   - agora basta copiar e colar no .env do projeto
 - No campo de organizações você vai digitar o nome das organizações onde estão os projetos que você trabalha sendo cada um em uma linha (ex: bbvinet)
+
+## Configurando Tasks
+- Você pode adicionar todas as tasks do mês, onde deve colocar corretamente o número da tarefa (história/inc) para gerar o hash corretamente
+- Os 3 campos restantes (período, projeto e branch) são para filtrar apenas os arquivos corretos caso esteja trabalhando em várias tarefa simultaneamente
+  - Caso só tenha trabalhado em uma tarefa por vez, pode preencher apenas o número da tarefa e a data
+- Depois de preencher todas as tarefas do mês, só clicar em salvar
+
+## Gerando relatório
+- Após configurar o projeto e adicionar as tarefas do mês, basta ir na aba relatórios e clicar em `Atualizar dados do Git` que o projeto começará a carregar todos seus commits e irá gerar todo o relatório para entrega da OF
+- O relátorio já está com os códigos atualizados por tipo de arquivo e por tipo de alteração.
+- O relatório dará uma média aproximada de pontos para suas alterações
+- OBS: Não inclui tarefas relacionadas a ritos ágeis ou configuração de ambiente, caso tenha feito durante o mês adicionar manualmente
+
+## Realizando a entrega
+- Basta abrir a aba que deseja entregar, na aba terá o código de entrega USTIBB e clicar no botão para copiar
+- Vai na tela de entrega de OF, digita o código USTIBB
+- deixa marcado `Lote` e cola a lista no campo de lista de artefatos (onde tem NomeArtefato;DescricaoDoArtefato)
+- Clica em importar
+- Depois clica em Enviar
+- Depois basta repetir o ciclo até enviar tudo
+- Ao finalizar basta realizar a entrega
