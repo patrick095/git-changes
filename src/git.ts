@@ -40,7 +40,8 @@ export class Git {
         private service: BaseService,
         private plataformaService: PlataformaService
     ) {
-        this.saveFile({}, 'git.json');
+        this.saveFile({}, 'git.json'); 
+        this.saveFile([], 'tasks-data.json');
         this.saveFile([], 'git-data-commits.json');
         this.saveFile([], 'git-all-commits.json');
         this.saveFile([], 'git-all-category.json');
