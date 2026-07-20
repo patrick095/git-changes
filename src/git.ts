@@ -40,43 +40,53 @@ export class Git {
         private service: BaseService,
         private plataformaService: PlataformaService
     ) {
-        this.saveFile({}, 'git.json');
-        this.saveFile([], 'git-data-commits.json');
-        this.saveFile([], 'git-all-commits.json');
-        this.saveFile([], 'git-all-category.json');
-        this.saveFile([], 'git-data-projects.json');
+        // this.saveFile({}, 'git.json');
+        this.saveFile([], "git-data-commits.json");
+        this.saveFile([], "git-all-commits.json");
+        this.saveFile([], "git-all-category.json");
+        this.saveFile([], "git-data-projects.json");
     }
 
     public async getAllData() {
-        console.info('[INFO]: iniciando Bot para pegar suas alterações do mês no GitHub');
+        console.info(
+            "[INFO]: iniciando Bot para pegar suas alterações do mês no GitHub"
+        );
         try {
             const user = await this.getUser();
             console.log(user);
             const username = user?.login ?? user?.name ?? user?.username;
             if (!username) {
-                throw new Error('Não foi possível identificar o usuário no GitHub.');
+                throw new Error(
+                    "Não foi possível identificar o usuário no GitHub."
+                );
             }
 
             const commits = await this.getUserCommits(username);
             console.info(
-                `[INFO]: O usuário realizou ${commits?.length ?? 0} commits nesse período.\nBuscando histórico de arquivos.`
+                `[INFO]: O usuário realizou ${
+                    commits?.length ?? 0
+                } commits nesse período.\nBuscando histórico de arquivos.`
             );
 
             const files = await this.getFilesInfo(commits);
             const formatedFiles =
-                this.plataformaService.splitFilesByTypeForSendToPlataform(files);
+                this.plataformaService.splitFilesByTypeForSendToPlataform(
+                    files
+                );
             const finalFormatedFiles =
                 this.plataformaService.splitFilesForUploadInfo(formatedFiles);
 
-            this.saveFile(finalFormatedFiles, 'git-data-commits.json');
-            this.saveFile(commits, 'git-all-commits.json');
+            this.saveFile(finalFormatedFiles, "git-data-commits.json");
+            this.saveFile(commits, "git-all-commits.json");
             this.saveFile(
                 this.plataformaService.splitFilesByCategory(formatedFiles),
-                'git-all-category.json'
+                "git-all-category.json"
             );
             this.saveFile(
-                this.plataformaService.listFilesByProjectByCategories(finalFormatedFiles),
-                'git-data-projects.json'
+                this.plataformaService.listFilesByProjectByCategories(
+                    finalFormatedFiles
+                ),
+                "git-data-projects.json"
             );
             return true;
         } catch (error) {
@@ -85,20 +95,15 @@ export class Git {
         }
     }
 
-    private saveFile(finalFormatedFiles: Array<any> | object, filename: string): void {
-        const path = join(
-            __dirname,
-            '/repositories',
-            `${filename}`
-        );
-        writeFile(
-            path,
-            JSON.stringify(finalFormatedFiles, null, 4),
-            (err) => {
-                if (err) return console.log(err);
-                console.info(`[INFO]: Arquivo salvo com sucesso em: ${filename}`);
-            }
-        );
+    private saveFile(
+        finalFormatedFiles: Array<any> | object,
+        filename: string
+    ): void {
+        const path = join(__dirname, "/repositories", `${filename}`);
+        writeFile(path, JSON.stringify(finalFormatedFiles, null, 4), (err) => {
+            if (err) return console.log(err);
+            console.info(`[INFO]: Arquivo salvo com sucesso em: ${filename}`);
+        });
     }
 
     private async getFilesInfo(
@@ -121,7 +126,10 @@ export class Git {
                 );
 
                 if (!commitDetail) {
-                    console.warn("[WARN]: Detalhes do commit não encontrados.", commit.sha);
+                    console.warn(
+                        "[WARN]: Detalhes do commit não encontrados.",
+                        commit.sha
+                    );
                     continue;
                 }
 
@@ -161,38 +169,54 @@ export class Git {
     }
 
     private getUser() {
-        return this.service.get<{ login: string; name?: string; username?: string }>(`/user`);
+        return this.service.get<{
+            login: string;
+            name?: string;
+            username?: string;
+        }>(`/user`);
     }
 
-    private async getUserCommits(username: string): Promise<Array<CommitsInterface>> {
+    private async getUserCommits(
+        username: string
+    ): Promise<Array<CommitsInterface>> {
         const { since, until, readableSince } = this.getCurrentMonthRange();
-        console.info('[INFO]: Consultando commits a partir de ' + readableSince);
+        console.info(
+            "[INFO]: Consultando commits a partir de " + readableSince
+        );
 
         const config = await this.repository.getConfig();
         const organizations = config.organizations ?? [];
         if (!organizations.length) {
-            console.warn('[WARN]: Nenhuma organização configurada. Configure pelo menos uma organização para continuar.');
+            console.warn(
+                "[WARN]: Nenhuma organização configurada. Configure pelo menos uma organização para continuar."
+            );
             return [];
         }
 
         const commits: Array<CommitsInterface> = [];
 
         for (const organization of organizations) {
-            console.info(`[INFO]: Buscando repositórios da organização ${organization}`);
-            const repositories = await this.getRepositoriesForOrganization(organization);
+            console.info(
+                `[INFO]: Buscando repositórios da organização ${organization}`
+            );
+            const repositories = await this.getRepositoriesForOrganization(
+                organization
+            );
 
             for (const repository of repositories) {
                 const encodedOrganization = encodeURIComponent(organization);
                 const encodedRepository = encodeURIComponent(repository.name);
-                console.info(`[INFO]: Buscando commits do repositório ${repository.full_name}`);
+                console.info(
+                    `[INFO]: Buscando commits do repositório ${repository.full_name}`
+                );
                 const query = `/repos/${encodedOrganization}/${encodedRepository}/commits?author=${encodeURIComponent(
                     username
-                )}&per_page=100&since=${encodeURIComponent(
-                    since
-                )}&until=${encodeURIComponent(until)}`;
+                )}&per_page=100&since=${encodeURIComponent(since)}`;
 
                 try {
-                    const repositoryCommits = await this.service.get<Array<GithubCommitSummaryInterface>>(query);
+                    const repositoryCommits = await this.service.get<
+                        Array<GithubCommitSummaryInterface>
+                    >(query);
                     repositoryCommits.forEach((commit) => {
                         if (!commit?.sha) return;
                         commits.push({
@@ -209,7 +233,11 @@ export class Git {
                         });
                     });
                 } catch (error) {
-                    console.error('[ERROR]: Falha ao buscar commits do repositório', repository.name, error);
+                    console.error(
+                        "[ERROR]: Falha ao buscar commits do repositório",
+                        repository.name,
+                        error
+                    );
                 }
             }
         }
