@@ -3,3 +3,4 @@ node_modules
 dist
 src/repositories/**/*.json
 tmp
+src/repositories/git.json
